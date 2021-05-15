@@ -1,4 +1,4 @@
-%script wave1d_simulate
+% script wave1d_simulate 
 %
 % 1d shallow water model
 %
@@ -33,8 +33,8 @@ for i=1:length(xlocs_waterlevel)
     loc_names{i}=sprintf('Waterlevel at x=%f km %s',0.001*xlocs_waterlevel(i),names{i});
 end
 nn=length(loc_names);
-for i=1:length(xlocs_velocity)
-    loc_names{i}=sprintf('Velocity at x=%f km %s',0.001*xlocs_velocity(i),names{i});
+for i=(1+nn):(length(xlocs_velocity)+nn)
+    loc_names{i}=sprintf('Velocity at x=%f km %s',0.001*xlocs_velocity(i-nn),names{i-nn});
 end
 s.xlocs_waterlevel=xlocs_waterlevel;
 s.xlocs_velocity=xlocs_velocity;
@@ -58,11 +58,11 @@ observed_data=zeros(length(ilocs),length(obs_times));
 observed_data(1,:)=obs_values(:);
 [obs_times,obs_values]=wave1d_read_series('tide_vlissingen.txt');
 observed_data(2,:)=obs_values(:);
-[obs_times,obs_values]=wave1d_read_series('tide_terneuzen.txt');
+[~,obs_values]=wave1d_read_series('tide_terneuzen.txt');
 observed_data(3,:)=obs_values(:);
-[obs_times,obs_values]=wave1d_read_series('tide_hansweert.txt');
+[~,obs_values]=wave1d_read_series('tide_hansweert.txt');
 observed_data(4,:)=obs_values(:);
-[obs_times,obs_values]=wave1d_read_series('tide_bath.txt');
+[~,obs_values]=wave1d_read_series('tide_bath.txt');
 observed_data(5,:)=obs_values(:);
 
-wave1d_plotseries(times,series_data,s,observed_data);
+wave1d_plotseries(times,series_data,s,observed_data)
