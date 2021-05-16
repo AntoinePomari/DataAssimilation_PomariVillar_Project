@@ -40,6 +40,7 @@ s.xlocs_waterlevel=xlocs_waterlevel;
 s.xlocs_velocity=xlocs_velocity;
 s.ilocs=ilocs;
 s.loc_names=loc_names;
+%blablabla
 %%
 [x,t0,s]=wave1d_initialize(s);
 t=s.t;
