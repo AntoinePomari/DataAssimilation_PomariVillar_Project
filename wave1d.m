@@ -44,7 +44,6 @@ s.loc_names=loc_names;
 [x,t0,s]=wave1d_initialize(s);
 t=s.t;
 times=s.times;
-%series_data=np.zeros((len(ilocs),len(t)))
 for i=1:length(t)
     fprintf(1,'timestep %d\n',i);
     x=wave1d_timestep(x,i,s);

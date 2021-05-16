@@ -33,7 +33,7 @@ function [x0,t0,settings_new]=wave1d_initialize(settings)
     g=settings.g;dx=settings.dx;f=settings.f;
     temp1=0.5*g*dt/dx;
     temp2=0.5*f*dt;
-    for i=2:2:(2*n-2) %in np.arange(1,2*n-1,2):
+    for i=2:2:(2*n-2)
         Adata(1,i-1)= -temp1;
         Adata(2,i  )= 1.0 + temp2;
         Adata(3,i+1)= +temp1;
@@ -47,7 +47,7 @@ function [x0,t0,settings_new]=wave1d_initialize(settings)
     %= h(n  ,m) - 0.5 D dt/dx ( u(n  ,m+1/2) - u(n  ,m-1/2))
     D=settings.D;
     temp1=0.5*D*dt/dx;
-    for i=3:2:(2*n-1) % in np.arange(2,2*n,2):
+    for i=3:2:(2*n-1)
         Adata(1,i-1)= -temp1;
         Adata(2,i  )= 1.0;
         Adata(3,i+1)= +temp1;
