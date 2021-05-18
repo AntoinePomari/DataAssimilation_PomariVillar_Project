@@ -43,12 +43,13 @@ function settings=wave1d_settings()
     bound_t=(bound_times-reftime)*days_to_seconds;
     settings.h_left = interp1(bound_t,bound_values,t);
     NN = zeros(1,size(settings.h_left,2));
-    alpha = exp(-dt/(hours_to_seconds*6))
+    alpha = exp(-dt/(hours_to_seconds*6));
     for ii=1:length(NN)-1
-        NN(ii+1) = alpha*NN(ii)+normrnd(0,0.2*(1-alpha^2));
+%       NN(ii+1) = alpha*NN(ii)+normrnd(0,0.2*(1-alpha^2));
+        NN(ii+1) = alpha*NN(ii)+normrnd(0,0.2*sqrt((1-alpha^2)));
     end
-    size(NN)
-    size(settings.h_left)
+%     size(NN)
+%     size(settings.h_left)
     settings.h_left = settings.h_left+NN;
 end
 
