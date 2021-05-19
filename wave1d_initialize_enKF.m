@@ -1,14 +1,16 @@
-function [x0,t0,settings_new]=wave1d_initialize(settings)
-% function [x0,t0,settings_new]=wave1d_initialize(settings); 
-%return (h,u,t) at initial time 
+function [x0,t0,settings_new]=wave1d_initialize_enKF(settings)
+% function [x0,t0,settings_new]=wave1d_initialize_enKF(settings); 
+%return the extended state at initial time, plus guess for one of the
+%ensemble members. To be called for each ensemble member.
     settings_new=settings;
     %compute initial fields and cache some things for speed
     h_0=settings.h_0;
     u_0=settings.u_0;
     n=settings.n;
-    x0=zeros(2*n,1); %order h[1],u[1],...h[n],u[n]
-    x0(1:2:end)=u_0(:);
-    x0(2:2:end)=h_0(:);
+    x0=zeros(2*n+1,1); %order h[1],u[1],...h[n],u[n], N (our AR incertainty)
+    x0(1:2:end-1)=u_0(:); 
+    x0(2:2:end-1)=h_0(:);
+    x0(end) = 0;
     %time
     t=settings.t;
     reftime=settings.reftime;
@@ -20,8 +22,8 @@ function [x0,t0,settings_new]=wave1d_initialize(settings)
     %initialize coefficients
     % create matrices in form A*x_new=B*x+alpha 
     % A and B are tri-diagonal sparse matrices 
-    Adata=zeros(3,2*n); %order h[1],u[1],...h[n],u[n]  
-    Bdata=zeros(3,2*n);
+    Adata=zeros(3,2*n+1); %order h[1],u[1],...h[n],u[n] N -->  3*2n+1
+    Bdata=zeros(3,2*n+1); %3*2n +1
     %left boundary
     Adata(2,1)=1.0;
     %right boundary
@@ -55,11 +57,16 @@ function [x0,t0,settings_new]=wave1d_initialize(settings)
         Bdata(2,i  )= 1.0;
         Bdata(3,i+1)= -temp1;
     end
+    Adata(2,end) = 1;
+    Bdata(2,end) = settings.alpha;
+    %ALSO: CREATE VECTOR G (zeros everywhere, 0.2*sqrt(1-alpha^2) at the
+    %end (do we really need vector G??)
     % build sparse matrix
-    A=spdiags(Adata',[-1,0,1],2*n,2*n);
-    figure,spy(A)
-    B=spdiags(Bdata',[-1,0,1],2*n,2*n);
-    figure,spy(B)
+    A=spdiags(Adata',[-1,0,1],2*n+1,2*n+1);
+    B=spdiags(Bdata',[-1,0,1],2*n+1,2*n+1);
+    B(1,size(B,1)) = 1;
+    size(B)
+    size(A)
     settings_new.A=A; %cache for later use
     settings_new.B=B;
     t0=t(1);

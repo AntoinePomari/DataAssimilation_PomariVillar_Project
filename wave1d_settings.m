@@ -20,7 +20,7 @@ function settings=wave1d_settings()
     x_h = linspace(0,L-dx,n);
     settings.x_h = x_h;
     settings.x_u = x_h+0.5;
-    % initial condition
+    % initial condition: ZEROS EVERYWHERE
     settings.h_0 = zeros(n,1);
     settings.u_0 = zeros(n,1);   
     % time
@@ -35,22 +35,23 @@ function settings=wave1d_settings()
     %1) simple function
     %settings.h_left = 2.5.*sin(2.*pi/(12.*hours_to_seconds)*t);
     %2) read from file
-%     [bound_times,bound_values]=wave1d_read_series('tide_cadzand.txt');
-%     bound_t=(bound_times-reftime)*days_to_seconds;
-%     settings.h_left = interp1(bound_t,bound_values,t);        
-%     %3) read from file + AR(1)
     [bound_times,bound_values]=wave1d_read_series('tide_cadzand.txt');
     bound_t=(bound_times-reftime)*days_to_seconds;
-    settings.h_left = interp1(bound_t,bound_values,t);
-    NN = zeros(1,size(settings.h_left,2));
-    alpha = exp(-dt/(hours_to_seconds*6));
-    for ii=1:length(NN)-1
-%       NN(ii+1) = alpha*NN(ii)+normrnd(0,0.2*(1-alpha^2));
-        NN(ii+1) = alpha*NN(ii)+normrnd(0,0.2*sqrt((1-alpha^2)));
-    end
-%     size(NN)
-%     size(settings.h_left)
-    settings.h_left = settings.h_left+NN;
+    settings.h_left = interp1(bound_t,bound_values,t);       
+    settings.alpha = exp(-dt/(hours_to_seconds*6));
+%     %3) read from file + AR(1)
+%     [bound_times,bound_values]=wave1d_read_series('tide_cadzand.txt');
+%     bound_t=(bound_times-reftime)*days_to_seconds;
+%     settings.h_left = interp1(bound_t,bound_values,t);
+%     NN = zeros(1,size(settings.h_left,2));
+%     alpha = exp(-dt/(hours_to_seconds*6));
+%     for ii=1:length(NN)-1
+%        NN(ii+1) = alpha*NN(ii)+normrnd(0,0.2*(1-alpha^2));
+%         NN(ii+1) = alpha*NN(ii)+normrnd(0,0.2*sqrt((1-alpha^2)));
+%     end
+%      size(NN)
+%      size(settings.h_left)
+%     settings.h_left = settings.h_left+NN;
 end
 
 
