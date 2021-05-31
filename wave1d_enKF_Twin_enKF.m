@@ -1,3 +1,4 @@
+%% Part 2 of Twin experiments: load the truth and observations, run for ensemble size 150
 clear all
 clc
 
@@ -20,23 +21,12 @@ s.xlocs_waterlevel=xlocs_waterlevel;
 s.xlocs_velocity=xlocs_velocity;
 s.ilocs=ilocs;
 s.loc_names=loc_names;
+%% EnKF run, FOR the TWIN experiment
 
 
-%% load observations
-[obs_times,obs_values]=wave1d_read_series('tide_cadzand.txt');
-observed_data=zeros(length(ilocs),length(obs_times));
-observed_data(1,:)=obs_values(:);
-[obs_times,obs_values]=wave1d_read_series('tide_vlissingen.txt');
-observed_data(2,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_terneuzen.txt');
-observed_data(3,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_hansweert.txt');
-observed_data(4,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_bath.txt');
-observed_data(5,:)=obs_values(:);
+load('x_twin3.mat'),load('z_twin3.mat');
 
-%% EnKF run, WITH measurement update included
-N = 150; %size of the ensemble
+N = 450; %size of the ensemble
 [x,t0,s]=wave1d_initialize_enKF(s);
 ksi = zeros(N,length(x));
 ksi = ksi';
@@ -65,18 +55,13 @@ for ii=1:length(t)
     PSI = H*L;
     %size(PSI)
     K = (L*(PSI'))/(PSI*PSI'+speye(5)); 
-%     v=zeros(5,1);
-%     for dummy =1:5
-%         v(dummy) = normrnd(0,0.2);
-%     end
-    for  jj=1:N 
-        ksi(:,jj)=ksi(:,jj)+K*(observed_data(1:5,ii)-H*ksi(:,jj));  %+v we forget about measurement error
+
+    for  jj=1:N
+        ksi(:,jj)=ksi(:,jj)+K*(z_twin3(1:5,ii)-H*ksi(:,jj)); 
     end
 end
 %%
-wave1d_plotseries(times,series_data,s,observed_data)
-
-
+wave1d_plotseries(times,series_data,s,z_twin3)
 
 
 

@@ -1,4 +1,5 @@
-
+%% enKF Twin Experiment Routine
+%OBJ of this one: run an identical twin experiment, 
 
 clear all
 clc
@@ -52,9 +53,9 @@ observed_data(5,:)=obs_values(:);
 
 wave1d_plotseries(times,series_data,s,observed_data)
 
-load('series_data_enKF_FirstTry.mat');
+%load('series_data_enKF_FirstTry.mat');
 
-wave1d_plotseries(times,series_data_enKF_FirstTry,s,observed_data)
+%wave1d_plotseries(times,series_data_enKF_FirstTry,s,observed_data)
 
 
 
