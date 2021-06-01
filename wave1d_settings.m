@@ -39,7 +39,7 @@ function settings=wave1d_settings()
     bound_t=(bound_times-reftime)*days_to_seconds;
     settings.h_left = interp1(bound_t,bound_values,t);       
     settings.alpha = exp(-dt/(hours_to_seconds*6));
-%     %3) read from file + AR(1)
+    %3) read from file + AR(1)
 %     [bound_times,bound_values]=wave1d_read_series('tide_cadzand.txt');
 %     bound_t=(bound_times-reftime)*days_to_seconds;
 %     settings.h_left = interp1(bound_t,bound_values,t);

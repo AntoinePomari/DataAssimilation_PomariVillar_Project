@@ -44,13 +44,5 @@ for ii=1:length(t)
    %OBSERVATIONS
    z_twin3(:,ii+1) = H*x_twin3;
 end
-save('x_twin3.mat'), save('z_twin3.mat');
-
-
-
-
-
-
-
-
+save('x_twin3.mat','x_twin3'), save('z_twin3.mat','z_twin3');
 

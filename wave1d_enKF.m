@@ -1,6 +1,5 @@
 %% enKF Twin Experiment Routine
 %OBJ of this one: run an identical twin experiment, 
-
 clear all
 clc
 
@@ -38,7 +37,7 @@ for i=1:length(t)
     x = (1/N)*sum(ksi,2);
     series_data(:,i)=x(ilocs);
 end
-%% load observations
+%% load observations, plot ensemble run (no measurement update) VS observed data
 [obs_times,obs_values]=wave1d_read_series('tide_cadzand.txt');
 observed_data=zeros(length(ilocs),length(obs_times));
 observed_data(1,:)=obs_values(:);
@@ -53,9 +52,9 @@ observed_data(5,:)=obs_values(:);
 
 wave1d_plotseries(times,series_data,s,observed_data)
 
-%load('series_data_enKF_FirstTry.mat');
 
-%wave1d_plotseries(times,series_data_enKF_FirstTry,s,observed_data)
+
+
 
 
 

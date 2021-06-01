@@ -22,46 +22,49 @@ s.xlocs_velocity=xlocs_velocity;
 s.ilocs=ilocs;
 s.loc_names=loc_names;
 %% EnKF run, FOR the TWIN experiment
+load('x_twin2.mat'),load('z_twin2.mat'); %load our 'truth' and the perfect observations based on our truth
 
-
-load('x_twin3.mat'),load('z_twin3.mat');
-
-N = 450; %size of the ensemble
+N = 150; %size of the ensemble: for N>200 results are decent in fact
 [x,t0,s]=wave1d_initialize_enKF(s);
-ksi = zeros(N,length(x));
+
+%Initial guess for the ensemble: what to choose? Anything goes basically
+ksi = normrnd(0,0.2,N,length(x));
+%ksi = zeros(N,length(x));
 ksi = ksi';
 t=s.t;
 times=s.times;
-L=ksi;
+LL=ksi;
 H=zeros(5,201);
 for ii = 1:length(xlocs_waterlevel)
     H(ii,ilocs(ii)) = 1; 
 end
 H = sparse(H);
 for ii=1:length(t)
-    %time step update
+    %time step update with AR(1) noise
     for  jj=1:N 
         ksi(:,jj)=wave1d_timestep_enKF(ksi(:,jj),ii,s);
     end
     x = (1/N)*sum(ksi,2);
     series_data(:,ii)=x(ilocs);
-    %measurement update: creating matrix L
+    %Getting ready for the measurement update: we create matrix L 
     for kk =1:N
-        L(:,kk) = ksi(:,kk)-x;
-        L(:,kk) = (1/sqrt(N-1))*L(:,kk);
+        LL(:,kk) = ksi(:,kk)-x;
+        LL(:,kk) = (1/sqrt(N-1))*LL(:,kk);
     end
-    L=sparse(L);
-    %creating PSI
-    PSI = H*L;
+    LL=sparse(LL);
+    %creating PSI for ease of computation
+    PSI = H*LL;
     %size(PSI)
-    K = (L*(PSI'))/(PSI*PSI'+speye(5)); 
-
+    
+    %Which matrix R to choose?
+%   K = (LL*(PSI'))/(PSI*PSI'+speye(5)); 
+    K = (LL*(PSI'))/(PSI*PSI'); 
     for  jj=1:N
-        ksi(:,jj)=ksi(:,jj)+K*(z_twin3(1:5,ii)-H*ksi(:,jj)); 
+        ksi(:,jj)=ksi(:,jj)+K*(z_twin2(1:5,ii)-H*ksi(:,jj)); 
     end
 end
 %%
-wave1d_plotseries(times,series_data,s,z_twin3)
+wave1d_plotseries(times,series_data,s,z_twin2)
 
 
 
