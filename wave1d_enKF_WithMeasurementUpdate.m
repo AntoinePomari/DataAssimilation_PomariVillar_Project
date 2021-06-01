@@ -26,17 +26,17 @@ s.loc_names=loc_names;
 [obs_times,obs_values]=wave1d_read_series('tide_cadzand.txt');
 observed_data=zeros(length(ilocs),length(obs_times));
 observed_data(1,:)=obs_values(:);
-[obs_times,obs_values]=wave1d_read_series('waterlevel_vlissingen.txt');
+[obs_times,obs_values]=wave1d_read_series('tide_vlissingen.txt');
 observed_data(2,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('waterlevel_terneuzen.txt');
+[~,obs_values]=wave1d_read_series('tide_terneuzen.txt');
 observed_data(3,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('waterlevel_hansweert.txt');
+[~,obs_values]=wave1d_read_series('tide_hansweert.txt');
 observed_data(4,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('waterlevel_bath.txt');
+[~,obs_values]=wave1d_read_series('tide_bath.txt');
 observed_data(5,:)=obs_values(:);
 
 %% EnKF run, WITH measurement update
-N = 450; %size of the ensemble
+N = 500; %size of the ensemble
 [x,t0,s]=wave1d_initialize_enKF(s);
 
 % Initial guess for the ensemble members: NB it's a random guess basically,
@@ -74,12 +74,13 @@ for ii=1:length(t)
     PSI = H*LL;    
     
     %Kalman gain: K = (LL*(PSI'))/(PSI*PSI'+R); %Which choice for matrix R?
-    K = (LL*(PSI'))/(PSI*PSI'+speye(5)); 
-%     K = (LL*(PSI'))/(PSI*PSI');
+%     K = (LL*(PSI'))/(PSI*PSI'+0.04*speye(5)); %white-noise type of measurement err, STD err = 0.2, uncorrelated
+     K = (LL*(PSI'))/(PSI*PSI'); %considering perfect measurements
 
 %measurement assimilation
     for  jj=1:N 
-        ksi(:,jj)=ksi(:,jj)+K*(observed_data(1:5,ii+1)-H*ksi(:,jj));  %NB why+1? observed_data also contain initial time.
+%        ksi(:,jj)=ksi(:,jj)+K*(observed_data(1:5,ii+1)-H*ksi(:,jj)-normrnd(0,0.2,5,1));  %NB why+1? observed_data also contain initial time.
+        ksi(:,jj)=ksi(:,jj)+K*(observed_data(1:5,ii+1)-H*ksi(:,jj)); %line above in case of noisy observations, this line for perfect observations
     end
     
     

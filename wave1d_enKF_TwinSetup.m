@@ -26,7 +26,7 @@ s.loc_names=loc_names;
 %% TWIN: 
 % run the stochastic model FW to get x "truth", z_obs
 %to be used later in the enKF
-[x_twin3,t0,s]=wave1d_initialize_enKF(s); %identical twin same stochastic numerical model as for enKF
+[x_twin,t0,s]=wave1d_initialize_enKF(s); %identical twin same stochastic numerical model as for enKF
 t=s.t;
 %system matrix: will be needed for the twin observations
 H=zeros(5,201);
@@ -34,15 +34,18 @@ for ii = 1:length(xlocs_waterlevel)
     H(ii,ilocs(ii)) = 1; 
 end
 H = sparse(H);
-z_twin3=zeros(5,length(t));
-%z_twin2(:,1)=H*x_twin2;
+z_twin=zeros(5,length(t));
+vector_of_noises = [];
 for ii=1:length(t)
-   %evolving in time, our new truth
-   x_twin3=wave1d_timestep_enKF(x_twin3,ii,s);
-   %series_twin(:,ii)=x_twin(ilocs);
-   %basing our new observation on the 'truth', considering PERFECT
-   %OBSERVATIONS
-   z_twin3(:,ii+1) = H*x_twin3;
+    %evolving in time, our new truth
+    x_twin=wave1d_timestep_enKF(x_twin,ii,s);
+    %series_twin(:,ii)=x_twin(ilocs);
+    v = normrnd(0,0.2,5,1); %needed to store all the white-noise error, otherwise there is a mismatch during run of the twin model
+%   z_twin(:,ii+1) = H*x_twin; %if we consider perfect obs
+    z_twin(:,ii+1) = H*x_twin+v; %if we assume white noise
+    vector_of_noises = [vector_of_noises, v]; %store all the noise in a 5xlength(t) matrix
 end
-save('x_twin3.mat','x_twin3'), save('z_twin3.mat','z_twin3');
+
+%remember to change the file name (left) each time you save new variables!!
+save('x_twin1_noisy.mat','x_twin'), save('z_twin1_noisy.mat','z_twin'), save('v1_noisy.mat','vector_of_noises');
 

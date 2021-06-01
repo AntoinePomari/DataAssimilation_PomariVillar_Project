@@ -22,11 +22,10 @@ s.xlocs_velocity=xlocs_velocity;
 s.ilocs=ilocs;
 s.loc_names=loc_names;
 %% EnKF run, FOR the TWIN experiment
-load('x_twin2.mat'),load('z_twin2.mat'); %load our 'truth' and the perfect observations based on our truth
+load('x_twin1_noisy.mat'),load('z_twin1_noisy.mat'), load('v1_noisy.mat'); %load our 'truth' and the perfect observations based on our truth
 
-N = 150; %size of the ensemble: for N>200 results are decent in fact
+N = 750; %size of the ensemble: for N>230 results are pretty good in fact
 [x,t0,s]=wave1d_initialize_enKF(s);
-
 %Initial guess for the ensemble: what to choose? Anything goes basically
 ksi = normrnd(0,0.2,N,length(x));
 %ksi = zeros(N,length(x));
@@ -57,14 +56,16 @@ for ii=1:length(t)
     %size(PSI)
     
     %Which matrix R to choose?
-%   K = (LL*(PSI'))/(PSI*PSI'+speye(5)); 
-    K = (LL*(PSI'))/(PSI*PSI'); 
+    K = (LL*(PSI'))/(PSI*PSI'+0.04*speye(5)); %white-noise type of measurement err, STD err = 0.2, uncorrelated
+%   error
+%     K = (LL*(PSI'))/(PSI*PSI');  %perfect observations
     for  jj=1:N
-        ksi(:,jj)=ksi(:,jj)+K*(z_twin2(1:5,ii)-H*ksi(:,jj)); 
+%         ksi(:,jj)=ksi(:,jj)+K*(z_twin(1:5,ii)-H*ksi(:,jj)); %if we use perfect observations NB why not ii+1 for the observations (like wave1d?): because we take it into account when we generate the truth and our true data
+        ksi(:,jj)=ksi(:,jj)+K*(z_twin(1:5,ii)-H*ksi(:,jj)-vector_of_noises(:,ii)); %if white noise is present
     end
 end
 %%
-wave1d_plotseries(times,series_data,s,z_twin2)
+wave1d_plotseries(times,series_data,s,z_twin)
 
 
 
