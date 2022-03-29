@@ -20,49 +20,45 @@ s.xlocs_waterlevel=xlocs_waterlevel;
 s.xlocs_velocity=xlocs_velocity;
 s.ilocs=ilocs;
 s.loc_names=loc_names;
-
-
 %% load observations
-[obs_times,obs_values]=wave1d_read_series('tide_cadzand.txt');
-observed_data=zeros(length(ilocs),length(obs_times));
-observed_data(1,:)=obs_values(:);
-[obs_times,obs_values]=wave1d_read_series('tide_vlissingen.txt');
+% [obs_times,obs_values]=wave1d_read_series('tide_cadzand.txt');
+% observed_data=zeros(length(ilocs),length(obs_times));
+% observed_data(1,:)=obs_values(:);
+[obs_times,obs_values]=wave1d_read_series('waterlevel_vlissingen.txt');
 observed_data(2,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_terneuzen.txt');
+[~,obs_values]=wave1d_read_series('waterlevel_terneuzen.txt');
 observed_data(3,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_hansweert.txt');
+[~,obs_values]=wave1d_read_series('waterlevel_hansweert.txt');
 observed_data(4,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_bath.txt');
+[~,obs_values]=wave1d_read_series('waterlevel_bath.txt');
 observed_data(5,:)=obs_values(:);
-
 %% EnKF run, WITH measurement update
-N = 300; %size of the ensemble
+N = 400; %size of the ensemble
 [x,t0,s]=wave1d_initialize_enKF(s);
-
 % Initial guess for the ensemble members: NB it's a random guess basically,
 % so anything goes
-%ksi = zeros(N,length(x));
-ksi = normrnd(0,0.2,N,length(x));
+ksi = zeros(N,length(x));
+%ksi = normrnd(0,0.2,N,length(x));
 % ksi = eye(N,length(x));
 ksi = ksi';
 t=s.t;
 times=s.times;
 LL=ksi;
-H=zeros(5,201);
-H(1,1) = 1;
-H(2,51) = 1;
-H(3,101) = 1;
-H(4,151) = 1;
-H(5,199) = 1;
+H=zeros(4,201);
+H(1,51)=1;
+H(2,101) = 1;
+H(3,151) = 1;
+H(4,199) = 1;
 H = sparse(H);
-for ii=1:length(t)
+deltat = 0;
+for ii=1:165-deltat*6
     %time step update, with AR(1) noise at the left boundary
     for  jj=1:N 
         ksi(:,jj)=wave1d_timestep_enKF(ksi(:,jj),ii,s);
     end
     % forecast data
     x = (1/N)*sum(ksi,2);
-    series_data0(:,ii)=x(ilocs);
+    series_data(:,ii)=x(ilocs);
     
     %creating matrix L aka getting ready for the measurement update
     for kk =1:N
@@ -76,16 +72,23 @@ for ii=1:length(t)
     PSI = H*LL;    
     
     %Kalman gain: K = (LL*(PSI'))/(PSI*PSI'+R); %Which choice for matrix R?
-%       K = (LL*(PSI'))/(PSI*PSI'+0.01*speye(4)); %white-noise type of measurement err, STD err = 0.2, uncorrelated
-     K = (LL*(PSI'))/(PSI*PSI'); %considering perfect measurements
+      K = (LL*(PSI'))/(PSI*PSI'+0.01*speye(4)); %white-noise type of measurement err, STD err = 0.2, uncorrelated
+%      K = (LL*(PSI'))/(PSI*PSI'); %considering perfect measurements
 
 %measurement assimilation
     for  jj=1:N 
-%         ksi(:,jj)=ksi(:,jj)+K*(observed_data(2:5,ii+1)-H*ksi(:,jj)-normrnd(0,0.1,4,1));  %NB why+1? observed_data also contain initial time.
-        ksi(:,jj)=ksi(:,jj)+K*(observed_data(1:5,ii+1)-H*ksi(:,jj)); %line above in case of noisy observations, this line for perfect observations
+        ksi(:,jj)=ksi(:,jj)+K*(observed_data(2:5,ii+1)-H*ksi(:,jj)-normrnd(0,0.1,4,1));  %NB why+1? observed_data also contain initial time.
+%         ksi(:,jj)=ksi(:,jj)+K*(observed_data(1:5,ii+1)-H*ksi(:,jj)); %line above in case of noisy observations, this line for perfect observations
     end
-    
-    
+end
+
+for ii=165-deltat*6+1:length(t)
+    for  jj=1:N 
+        ksi(:,jj)=wave1d_timestep_enKF(ksi(:,jj),ii,s);
+    end
+    x = (1/N)*sum(ksi,2);
+    series_data(:,ii)=x(ilocs);
 end
 %% plotting observations vs Kalman predicted w/ measurement update
-wave1d_plotseries(times,series_data0,s,observed_data(1:5,:))
+wave1d_plotseries(times,series_data,s,observed_data(1:5,:))
+%save('forecast12.mat','series_data12')

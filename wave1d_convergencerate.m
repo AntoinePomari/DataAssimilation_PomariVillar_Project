@@ -1,4 +1,4 @@
-%% Part 2 of Twin experiments: load the truth and observations, run for ensemble size 150
+%% Checking the convergence rate
 clear all
 clc
 
@@ -22,14 +22,16 @@ s.xlocs_velocity=xlocs_velocity;
 s.ilocs=ilocs;
 s.loc_names=loc_names;
 %% EnKF run, FOR the TWIN experiment
-load('z_twin3.mat'), %load('v_noisy.mat'); %load our 'truth' and the perfect observations based on our truth
-
-N = 600; %size of the ensemble: for N>230 results are pretty good in fact
+load('x_twin2.mat'), load('z_twin3_noisy.mat'), load('v3_noisy.mat'); %load our 'truth' and the perfect observations based on our truth
+%rng(1)
+results=[];
+NN = [50, 100, 200, 500, 1000, 1500, 3000];
+for ll=1:length(NN)
+N = NN(ll); %size of the ensemble: for N>200 results are decent in fact
 [x,t0,s]=wave1d_initialize_enKF(s);
+
 %Initial guess for the ensemble: what to choose? Anything goes basically
-%OR NOT?
-%N
-ksi = normrnd(0,0.2,N,length(x));
+ksi = normrnd(0,0.1,N,length(x));
 %ksi = zeros(N,length(x));
 ksi = ksi';
 t=s.t;
@@ -58,27 +60,19 @@ for ii=1:length(t)
     %size(PSI)
     
     %Which matrix R to choose?
-%     K = (LL*(PSI'))/(PSI*PSI'+0.2*speye(5)); %white-noise type of measurement err, STD err = 0.2, uncorrelated
-%   error
-    K = (LL*(PSI'))/(PSI*PSI');  %perfect observations
+      K = (LL*(PSI'))/(PSI*PSI'+0.01*speye(5)); 
+%     K = (LL*(PSI'))/(PSI*PSI'); 
     for  jj=1:N
-        ksi(:,jj)=ksi(:,jj)+K*(z_twin3(1:5,ii)-H*ksi(:,jj)); %if we use perfect observations NB why not ii+1 for the observations (like wave1d?): because we take it into account when we generate the truth and our true data
-%         ksi(:,jj)=ksi(:,jj)+K*(z_twin(1:5,ii)-H*ksi(:,jj)-vector_of_noises(:,ii)); %if white noise is present
+        ksi(:,jj)=ksi(:,jj)+K*(z_twin(1:5,ii)-H*ksi(:,jj)-vector_of_noises(:,ii)); 
     end
 end
-%%
-% perfect_data=zeros(5,289);
-% for ii=1:289
-%     %evolving in time, our new truth
-%     x_twin=truth_of_model(:,ii);
-%     %series_twin(:,ii)=x_twin(ilocs);
-% %    v = vector_ %needed to store all the white-noise error, otherwise there is a mismatch during run of the twin model
-%     perfect_data(:,ii+1) = H*x_twin; %if we consider perfect obs
-% %   z_twin(:,ii+1) = H*x_twin+v; %if we assume white noise
-% end
+results((1+(ll-1)*5):5*ll,:)=series_data(1:5,:);
+MSE6(ll)=sqrt(sum(sum((results((1+(ll-1)*5):5*ll,:)-z_twin(:,2:end)).^2))/1440);
+end
+semilogx(NN,MSE6)
 
 
-wave1d_plotseries(times,series_data,s,z_twin3)
+
 
 
 

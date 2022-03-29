@@ -36,9 +36,11 @@ end
 H = sparse(H);
 z_twin=zeros(5,length(t));
 vector_of_noises = [];
+truth_of_model = [x_twin];
 for ii=1:length(t)
     %evolving in time, our new truth
     x_twin=wave1d_timestep_enKF(x_twin,ii,s);
+    truth_of_model = [truth_of_model, x_twin];
     %series_twin(:,ii)=x_twin(ilocs);
     v = normrnd(0,0.2,5,1); %needed to store all the white-noise error, otherwise there is a mismatch during run of the twin model
 %   z_twin(:,ii+1) = H*x_twin; %if we consider perfect obs
@@ -47,5 +49,5 @@ for ii=1:length(t)
 end
 
 %remember to change the file name (left) each time you save new variables!!
-save('x_twin1_noisy.mat','x_twin'), save('z_twin1_noisy.mat','z_twin'), save('v1_noisy.mat','vector_of_noises');
+save('truth_noisy.mat','truth_of_model'), save('z_twin_noisy.mat','z_twin'), save('v_noisy.mat','vector_of_noises');
 

@@ -56,13 +56,13 @@ end
 [obs_times,obs_values]=wave1d_read_series('tide_cadzand.txt');
 observed_data=zeros(length(ilocs),length(obs_times));
 observed_data(1,:)=obs_values(:);
-[obs_times,obs_values]=wave1d_read_series('tide_vlissingen.txt');
+[obs_times,obs_values]=wave1d_read_series('waterlevel_vlissingen.txt');
 observed_data(2,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_terneuzen.txt');
+[~,obs_values]=wave1d_read_series('waterlevel_terneuzen.txt');
 observed_data(3,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_hansweert.txt');
+[~,obs_values]=wave1d_read_series('waterlevel_hansweert.txt');
 observed_data(4,:)=obs_values(:);
-[~,obs_values]=wave1d_read_series('tide_bath.txt');
+[~,obs_values]=wave1d_read_series('waterlevel_bath.txt');
 observed_data(5,:)=obs_values(:);
 
 wave1d_plotseries(times,series_data,s,observed_data)

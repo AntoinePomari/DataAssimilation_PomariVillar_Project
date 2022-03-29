@@ -64,7 +64,7 @@ function [x0,t0,settings_new]=wave1d_initialize_enKF(settings)
     % build sparse matrix
     A=spdiags(Adata',[-1,0,1],2*n+1,2*n+1);
     B=spdiags(Bdata',[-1,0,1],2*n+1,2*n+1);
-    B(1,size(B,1)) = 1;
+    B(:,size(B,1)) = 1;
     size(B)
     size(A)
     settings_new.A=A; %cache for later use
